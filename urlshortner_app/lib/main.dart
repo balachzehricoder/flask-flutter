@@ -14,12 +14,70 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: UrlShortenerScreen(),
+      home: const ApiUrlInputScreen(),
+    );
+  }
+}
+
+class ApiUrlInputScreen extends StatefulWidget {
+  const ApiUrlInputScreen({Key? key}) : super(key: key);
+
+  @override
+  _ApiUrlInputScreenState createState() => _ApiUrlInputScreenState();
+}
+
+class _ApiUrlInputScreenState extends State<ApiUrlInputScreen> {
+  final TextEditingController _apiUrlController = TextEditingController();
+
+  void _navigateToUrlShortener(String apiUrl) {
+    if (apiUrl.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => UrlShortenerScreen(apiUrl: apiUrl),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Enter API URL'),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextField(
+              controller: _apiUrlController,
+              decoration: const InputDecoration(
+                labelText: 'Enter API URL',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                _navigateToUrlShortener(_apiUrlController.text);
+              },
+              child: const Text('Go to URL Shortener'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
 
 class UrlShortenerScreen extends StatefulWidget {
+  final String apiUrl;
+
+  const UrlShortenerScreen({Key? key, required this.apiUrl}) : super(key: key);
+
   @override
   _UrlShortenerScreenState createState() => _UrlShortenerScreenState();
 }
@@ -36,11 +94,8 @@ class _UrlShortenerScreenState extends State<UrlShortenerScreen> {
     });
 
     try {
-      // Replace with your Flask server URL
-      const String apiUrl = 'https://c2e4-111-88-181-12.ngrok-free.app/shortner';
-
       final response = await http.post(
-        Uri.parse(apiUrl),
+        Uri.parse(widget.apiUrl),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'url': originalUrl}),
       );
